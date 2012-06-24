@@ -8,7 +8,7 @@ f90files = glob.glob(geotherm_root+'/geotherm/src/*.f90')
 f90files = sorted(f90files, key=str.lower)   # Trier la liste. Pas necessaire
 
 # f90files = ['./geotherm/src/MassEquation_class.f90']
-#f90files = [geotherm_root+'/geotherm/src/method_class.f90']
+#f90files = [geotherm_root+'/geotherm/src/mesh_class.f90']
 # Récupérer toute les fonctions du code
 list_of_fct = []
 module, tmp, private = {}, {}, {}
@@ -32,6 +32,7 @@ for f90 in f90files:
     if not tmp == []:
         f90_basename = os.path.basename(f90[:-4])
         f90called = mygraph(f90_basename, rankdir='LR')
+        #f90called = mygraph(f90_basename, rankdir='LR',allnodes=False)
         # if f90_basename in ['tools_class','c_interface','divergence','EnerEquation_class','MassEquation_class','method_class'] :
         #     f90called = mygraph(f90_basename, rankdir='LR')
         # else:
@@ -46,7 +47,7 @@ for f90 in f90files:
                 f90called.lier_noeuds(sub, called )
         f90called.write_png(imgdir+f90_basename+'_graph')
 
-
+quit()
 ###################################################################
 
 total = mygraph('Total', rankdir='LR')
