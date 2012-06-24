@@ -17,13 +17,7 @@ class mygraph(object):
                 label = name
             else:
                 shape='record'
-                #label ="<f0> %s|private"%name
-
-                label ='<<table border="0"> \
-<tr><td>%s</td></tr>\
-<tr><td>private </td></tr> \
-</table>>'%name
-
+                label ='<<table border="0"><tr><td>%s</td></tr><tr><td>private</td></tr></table>>'%name
             setattr(self,name, pydot.Node(name,label=label,shape=shape,color=color,style='filled',fillcolor=fillcolor))
             if self.allnodes == True:
                 self.graph.add_node(getattr(self,name))
@@ -33,7 +27,6 @@ class mygraph(object):
 
     def lier_noeuds(self, a, b):
         if hasattr(self,a+b):
-            getattr(self,a+b) # test si un lien existe
             setattr(self,a+b, getattr(self,a+b) + 1) # compteur de lien. pas encore utilise
         else:
             if self.allnodes == False:
@@ -126,13 +119,12 @@ def get_mod_and_use(input,use_ignore=[]):
     return modname, datas, private
 
 import re
-def call_graph(input, list_of_fct=[]):
+def call_graph(input, list_of_fct=[], igcalled = []):
     with open(input,'r') as f90:
         called, dico = [], {}
         insub, inint = 1, 1  # I'm not in a subroutine or an interface declaration
         lines = f90.readlines()
         for line in lines:
-            #print insub, inint
             l = line.strip()
             if l.startswith('!') : # ligne de commentaire
                 pass
@@ -143,23 +135,28 @@ def call_graph(input, list_of_fct=[]):
                         i           = worked_line.index('(')
                         subname     = worked_line[:i]
                         insub = 0
+                    elif l.startswith('function '):
+                        worked_line = l.replace('function ','')
+                        i           = worked_line.index('(')
+                        subname     = worked_line[:i]
+                        insub = 0
                 else:
-                    # insub = 0
                     if inint == 0:
-                        if l.startswith('end interface ') or l.startswith('end interface'):
+                        if l.startswith('end interface'):
                             inint = 1
                     else:
-                        # inint = 1
-                        if l.startswith('interface ') or l.startswith('interface'):
+                        if l.startswith('interface'):
                             inint = 0
-                        elif l.startswith('end subroutine '):
+                        elif l.startswith('end subroutine') or  l.startswith('end function'):
                             dico[subname] = called
-                            called = []
-                            insub  = 1
+                            called        = []
+                            insub         = 1  # sortie de la subroutine
                         elif l.startswith('call '):
                             worked_line = l.replace('call ','')
                             i           = worked_line.index('(')
-                            called.append(worked_line[:i])
+                            name        = worked_line[:i].strip()
+                            if not name in igcalled:
+                                called.append(name)
                         else:
                             # Rechercher si j'appelle une de mes fonctions
                             for fct in list_of_fct:
@@ -174,12 +171,14 @@ def call_graph(input, list_of_fct=[]):
                                     # et enlever espace(s) apres '=' si il y en a
                                     worked_line = worked_line[ibeg+1:].strip()
                                     iend        = worked_line.index('(')
-                                    called.append(worked_line[: iend])
+                                    name        = worked_line[:iend].strip()
+                                    if not name in igcalled:
+                                        called.append(name)
                                     break   # sort de la boucle des qu'une fonction est trouvee dans la ligne
     return dico
 
 
-def make_graph(f90files, use_ignoree=[],module_not_printed=[]):
+def make_graph(f90files, use_ignoree=[], module_not_printed=[]):
     # Recuperer la dependence entre modules
     module, private  = {}, {}
 
