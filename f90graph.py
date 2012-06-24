@@ -3,7 +3,7 @@ import pydot
 
 ##################################   Adaptation de pydot a mes besoins ##################################
 class mygraph(object):
-    def __init__(self,name,rankdir=None,allnodes=False):#,shape='box',color='black',fillcolor='green'):
+    def __init__(self,name,rankdir=None,allnodes=True):#,shape='box',color='black',fillcolor='green'):
         if rankdir == None:
             self.graph = pydot.Dot(graph_type='digraph')
         else:
