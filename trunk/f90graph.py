@@ -178,8 +178,8 @@ def call_graph(input, list_of_fct=[], igcalled = []):
     return dico
 
 
-def make_graph(f90files, use_ignoree=[], module_not_printed=[]):
-    # Recuperer la dependence entre modules
+def make_graph(f90files, use_ignoree=[], module_not_printed=[], highlighted_use = []):
+    # Recuperer la dependence entre modules and the atrribute private
     module, private  = {}, {}
 
     for f90 in f90files:
@@ -195,7 +195,7 @@ def make_graph(f90files, use_ignoree=[], module_not_printed=[]):
         if mod in module_not_printed:
             pass
         else:
-            if mod in ['graphics_class','print_class']:
+            if mod in highlighted_use :
                 gtharchi.creer_noeud( mod,fillcolor='green',private = private[mod] )
             else:
                 gtharchi.creer_noeud( mod,private = private[mod] )
