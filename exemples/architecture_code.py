@@ -14,11 +14,13 @@ geotherm_root = os.environ['GEOTHERM_ROOT']
 f90files = glob.glob(geotherm_root+'/geotherm/src/*.f90')
 
 # Ignorer des modules dans l'arbre d'appel, pour le simplifier par exemple
-use_ignoree = ['storag_class','contxt_class','eos_h2o_ph']
-# ne seront pas affichés
-module_not_printed = ['print_class', 'graphics_class']
+ExternalUsed = ['storag_class','contxt_class','eos_h2o_ph']
+#use_ignoree = []
 
-gtharchi = make_graph(f90files, use_ignoree, module_not_printed)
+# ne seront pas affichés
+NotUsed = ['graphics_class','print_class']
+
+gtharchi = make_graph(f90files, use_ignoree=ExternalUsed, module_not_printed=[], highlighted_use=NotUsed)
 
 imgdir = './img/'
 name = imgdir+'architecture_graph'
